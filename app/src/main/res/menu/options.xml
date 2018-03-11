@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:title="Mapa"
+        android:id="@+id/item_map"
+        app:showAsAction="ifRoom"
+        android:orderInCategory="1"
+        />
+
+    <item android:title="Sair"
+        android:id="@+id/item_sair"
+        app:showAsAction="ifRoom"
+        android:orderInCategory="2"/>
+</menu>
