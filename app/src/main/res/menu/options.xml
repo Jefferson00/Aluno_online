@@ -2,8 +2,14 @@
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:title="Mapa"
-        android:id="@+id/item_map"
+    <item android:title="Perfil"
+        android:id="@+id/item_perfil"
+        app:showAsAction="ifRoom"
+        android:orderInCategory="1"
+        />
+
+    <item android:title="Cadastrar Perfil"
+        android:id="@+id/item_cad_perfil"
         app:showAsAction="ifRoom"
         android:orderInCategory="1"
         />

@@ -88,8 +88,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         /*FIM METODO LOGIN COM O GOOGLE*/
 
         /*INICIO METODO DE LOGIN COM O FACEBOOK*/
-        FacebookSdk.sdkInitialize(getApplicationContext());
-        AppEventsLogger.activateApp(this);
+
 
         ImageView faceLoginBtn = findViewById(R.id.facebookLoginBtn);
 
@@ -107,18 +106,20 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-                Intent it = new Intent(LoginActivity.this, MainActivity.class);
-                startActivity(it);
+                //handleFacebookAccessToken(loginResult.getAccessToken());
+                Intent it1 = new Intent(LoginActivity.this, MainActivity.class);
+                it1.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(it1);
             }
 
             @Override
             public void onCancel() {
-
+                Toast.makeText(LoginActivity.this, "Cancelado", Toast.LENGTH_LONG).show();
             }
 
             @Override
             public void onError(FacebookException error) {
-
+                Toast.makeText(LoginActivity.this, "Não foi posível efetuar login", Toast.LENGTH_LONG).show();
             }
         });
 
@@ -151,9 +152,14 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     /*METODOS LOGIN FACEBOOK*/
 
-    protected void onActivityResultFacebook(int requestCode, int resultCode,Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode,Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         mCallbackManager.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == RC_SIGN_IN) {
+            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+            handleSignInResult(result);
+        }
     }
 
     private void handleFacebookAccessToken(AccessToken token) {
@@ -203,14 +209,11 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     }
 
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        super.onActivityResult(requestCode, resultCode, data);
+//
 
-        if (requestCode == RC_SIGN_IN) {
-            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            handleSignInResult(result);
-        }
-    }
+//    }
 
     private void handleSignInResult(GoogleSignInResult result) {
         if (result.isSuccess()) {
