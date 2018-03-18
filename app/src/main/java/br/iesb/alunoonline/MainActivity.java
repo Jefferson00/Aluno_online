@@ -23,6 +23,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -31,6 +32,8 @@ import java.util.UUID;
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
+    FirebaseAuth mAuth;
+    FirebaseUser currentUser;
 
     GoogleApiClient mGoogleApiClient;
     @Override
@@ -52,6 +55,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     protected void onStart() {
+        mAuth = FirebaseAuth.getInstance();
+        currentUser = mAuth.getCurrentUser();
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .build();
@@ -81,18 +86,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             return true;
         }
         else if (id == R.id.item_sair){
-            Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
-                    new ResultCallback<Status>() {
-                        @Override
-                        public void onResult(Status status) {
-                            // ...
-                            Toast.makeText(getApplicationContext(), "Logged Out", Toast.LENGTH_SHORT).show();
-                            Intent i = new Intent(getApplicationContext(), LoginActivity.class);
-                            startActivity(i);
-                        }
+            if (currentUser.getClass() != null){
+                Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+                        new ResultCallback<Status>() {
+                            @Override
+                            public void onResult(Status status) {
+                                // ...
+                                Toast.makeText(getApplicationContext(), "Logged Out", Toast.LENGTH_SHORT).show();
+                                Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+                                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(i);
+                            }
 
-        });
-
+                        });
+            }
             return true;
         }
         return super.onOptionsItemSelected(item);

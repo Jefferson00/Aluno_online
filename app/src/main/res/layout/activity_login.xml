@@ -87,13 +87,6 @@
         app:layout_constraintTop_toBottomOf="@+id/textView"
         app:srcCompat="@drawable/group" />
 
-    <com.facebook.login.widget.LoginButton
-        android:id="@+id/button_facebook_login"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="30dp"
-        android:layout_marginBottom="30dp" />
     <ImageView
         android:id="@+id/googleLoginBtn"
         android:layout_width="wrap_content"

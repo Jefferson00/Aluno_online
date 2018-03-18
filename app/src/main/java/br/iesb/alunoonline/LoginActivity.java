@@ -15,6 +15,7 @@ import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.login.LoginManager;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.Auth;
@@ -36,6 +37,7 @@ import com.google.firebase.auth.GoogleAuthProvider;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
 public class LoginActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
     private FirebaseAuth mAuth;
@@ -93,17 +95,13 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         ImageView faceLoginBtn = findViewById(R.id.facebookLoginBtn);
 
         //faceLoginBtn.setReadPermissions("email");
-        faceLoginBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                loginFacebook();
-            }
-        });
+
 
         mCallbackManager = CallbackManager.Factory.create();
-        LoginButton loginButton = (LoginButton) findViewById(R.id.button_facebook_login);
-        loginButton.setReadPermissions("email", "public_profile");
-        loginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
+//        LoginButton loginButton = (LoginButton) findViewById(R.id.button_facebook_login);
+//        loginButton.setReadPermissions("email", "public_profile");
+
+        LoginManager.getInstance().registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
                 //handleFacebookAccessToken(loginResult.getAccessToken());
@@ -123,7 +121,12 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             }
         });
 
-
+        faceLoginBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                LoginManager.getInstance().logInWithReadPermissions(LoginActivity.this, Arrays.asList("email", "public_profile"));
+            }
+        });
 
         /*FIM METODO DE LOGIN COM O FACEBOOK*/
 
@@ -225,6 +228,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     private void goMainScreen() {
         Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
     }
 }
