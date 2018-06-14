@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -33,6 +34,7 @@ import com.google.firebase.auth.FirebaseAuth;
 
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 
 import java.security.MessageDigest;
@@ -46,6 +48,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     private static final int RC_SIGN_IN = 777;
     private GoogleApiClient googleApiClient;
     private CallbackManager mCallbackManager;
+    private FirebaseUser user;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +65,14 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         btLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                login();
+                if (verificaUser()) {
+                    if(validarForm()){
+                        login();
+                    }
+
+                }else{
+                    goMainScreen();
+                }
             }
         });
 
@@ -70,6 +80,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
 //                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestProfile()
                 .requestEmail()
                 .build();
 
@@ -83,8 +94,10 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         googleLoginBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
-                startActivityForResult(intent, RC_SIGN_IN);
+                if (verificaUser()) {
+                    Intent intent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
+                    startActivityForResult(intent, RC_SIGN_IN);
+                }
             }
         });
         /*FIM METODO LOGIN COM O GOOGLE*/
@@ -105,9 +118,11 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
             @Override
             public void onSuccess(LoginResult loginResult) {
                 //handleFacebookAccessToken(loginResult.getAccessToken());
-                Intent it1 = new Intent(LoginActivity.this, MainActivity.class);
-                it1.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(it1);
+                if (verificaUser()) {
+                    Intent it1 = new Intent(LoginActivity.this, ListaActivity.class);
+                    it1.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(it1);
+                }
             }
 
             @Override
@@ -152,6 +167,27 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
         });
     }
 
+    private boolean validarForm() {
+        boolean valid = true;
+
+        String email = txtEmail.getText().toString();
+        if (TextUtils.isEmpty(email)) {
+            txtEmail.setError("Required.");
+            valid = false;
+        } else {
+            txtEmail.setError(null);
+        }
+
+        String senha = txtSenha.getText().toString();
+        if (TextUtils.isEmpty(senha)) {
+            txtSenha.setError("Required.");
+            valid = false;
+        } else {
+            txtSenha.setError(null);
+        }
+
+        return valid;    }
+
 
     /*METODOS LOGIN FACEBOOK*/
 
@@ -173,7 +209,7 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            Intent it = new Intent(LoginActivity.this, MainActivity.class);
+                            Intent it = new Intent(LoginActivity.this, ListaActivity.class);
                             startActivity(it);
                         } else {
                             Toast.makeText(LoginActivity.this, "Não foi posível efetuar login", Toast.LENGTH_LONG).show();
@@ -188,22 +224,20 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
 
     /*METODO LOGIN EMAIL E SENHA*/
     private void login() {
-        if (txtEmail.getText().toString().equals(" ") || txtSenha.getText().toString().equals(" ")) {
-            Toast.makeText(LoginActivity.this, "Digite email e senha", Toast.LENGTH_LONG).show();
-        } else {
-            mAuth.signInWithEmailAndPassword(txtEmail.getText().toString(), txtSenha.getText().toString())
+
+        mAuth.signInWithEmailAndPassword(txtEmail.getText().toString(), txtSenha.getText().toString())
                     .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                         @Override
                         public void onComplete(@NonNull Task<AuthResult> task) {
                             if (!task.isSuccessful()) {
                                 Toast.makeText(LoginActivity.this, "Não foi posível efetuar login", Toast.LENGTH_LONG).show();
                             } else {
-                                Intent it = new Intent(LoginActivity.this, MainActivity.class);
+                                Intent it = new Intent(LoginActivity.this, ListaActivity.class);
                                 startActivity(it);
                             }
                         }
                     });
-        }
+
     }
 
     /*METODOS LOGIN GOOGLE*/
@@ -227,8 +261,17 @@ public class LoginActivity extends AppCompatActivity implements GoogleApiClient.
     }
 
     private void goMainScreen() {
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, ListaActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
+    }
+
+    private boolean verificaUser(){
+        user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            return false;
+        } else {
+            return true;
+        }
     }
 }

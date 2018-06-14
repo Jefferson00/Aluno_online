@@ -5,15 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="br.iesb.alunoonline.CadastrarPerfilActivity">
-    <TextView
-        android:id="@+id/textView11"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:text="Hello World!"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txInteresses" />
 
     <Button
         android:id="@+id/btnInserir"
@@ -21,11 +12,11 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="32dp"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="8dp"
         android:text="inserir dados"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView11" />
+        app:layout_constraintTop_toBottomOf="@+id/txDtNasc" />
 
     <EditText
         android:id="@+id/txNome"
@@ -43,64 +34,34 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <EditText
-        android:id="@+id/txCurso"
+        android:id="@+id/txEstado"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
         android:ems="10"
-        android:hint="Curso"
-        android:inputType="textPersonName"
+        android:hint="Estado"
+        android:inputType="text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.503"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txNome" />
 
     <EditText
-        android:id="@+id/txMatricula"
+        android:id="@+id/txCidade"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:ems="10"
-        android:hint="Matricula"
-        android:inputType="number"
+        android:hint="Cidade"
+        android:inputType="text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.503"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txCurso" />
-
-    <EditText
-        android:id="@+id/txCampus"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
-        android:ems="10"
-        android:hint="Campus"
-        android:inputType="textPersonName"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.503"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txMatricula" />
-
-    <EditText
-        android:id="@+id/txInteresses"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="24dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="8dp"
-        android:ems="10"
-        android:hint="Interesses "
-        android:inputType="textMultiLine"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txDtNasc" />
+        app:layout_constraintTop_toBottomOf="@+id/txEstado" />
 
     <EditText
         android:id="@+id/txDtNasc"
@@ -114,5 +75,5 @@
         android:inputType="number"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txCampus" />
+        app:layout_constraintTop_toBottomOf="@+id/txCidade" />
 </android.support.constraint.ConstraintLayout>

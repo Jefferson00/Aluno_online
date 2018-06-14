@@ -27,13 +27,23 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.List;
 import java.util.UUID;
+
+
+import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
 
-    private GoogleMap mMap;
+    private GoogleMap nMap;
     FirebaseAuth mAuth;
     FirebaseUser currentUser;
+    String codEscola;
+    EscolaService escolaService;
 
     GoogleApiClient mGoogleApiClient;
     @Override
@@ -41,17 +51,50 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
+
+        Intent intent = getIntent();
+        if (intent.hasExtra(Intent.EXTRA_TEXT)){
+            String codEscolaList = intent.getStringExtra(Intent.EXTRA_TEXT);
+            codEscola = codEscolaList;
+        }
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("http://mobile-aceite.tcu.gov.br:80/nossaEscolaRS/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        escolaService = retrofit.create(EscolaService.class);
+
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
     }
 
     @Override
     public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
+        nMap = googleMap;
 
-        LatLng iesbSul = new LatLng(-15.7571194, -47.8788442);
-        mMap.addMarker(new MarkerOptions().position(iesbSul).title("IESB Sul"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(iesbSul, 15));
+        Call<Escola> requisicao = escolaService.buscaEscola(codEscola);
+
+        requisicao.enqueue(new Callback<Escola>(){
+
+            @Override
+            public void onResponse(Call<Escola> requisicao, Response<Escola> response) {
+                if (response.isSuccessful()){
+                    Escola e = response.body();
+                    if (e != null){
+                        LatLng escola = new LatLng(e.latitude, e.longitude);
+                        nMap.addMarker(new MarkerOptions().position(escola).title(e.nome));
+                        nMap.moveCamera(CameraUpdateFactory.newLatLngZoom(escola, 15));
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Escola> requisicao, Throwable t) {
+                Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     protected void onStart() {
@@ -60,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .build();
-         mGoogleApiClient = new GoogleApiClient.Builder(this)
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
         mGoogleApiClient.connect();
@@ -85,21 +128,25 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             startActivity(it);
             return true;
         }
+        else if (id == R.id.item_cad_perfil){
+            Intent it = new Intent(MainActivity.this, CadastrarPerfilActivity.class);
+            startActivity(it);
+            return true;
+        }
         else if (id == R.id.item_sair){
-            if (currentUser.getClass() != null){
-                Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
-                        new ResultCallback<Status>() {
-                            @Override
-                            public void onResult(Status status) {
-                                // ...
-                                Toast.makeText(getApplicationContext(), "Logged Out", Toast.LENGTH_SHORT).show();
-                                Intent i = new Intent(getApplicationContext(), LoginActivity.class);
-                                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                                startActivity(i);
-                            }
+            Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+                    new ResultCallback<Status>() {
+                        @Override
+                        public void onResult(Status status) {
+                            // ...
+                            Toast.makeText(getApplicationContext(), "Logged Out", Toast.LENGTH_SHORT).show();
+                            Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+                            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                            startActivity(i);
+                        }
 
-                        });
-            }
+                    });
+            mAuth.signOut();
             return true;
         }
         return super.onOptionsItemSelected(item);

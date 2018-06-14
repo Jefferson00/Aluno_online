@@ -16,6 +16,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -24,13 +26,12 @@ import java.util.UUID;
 public class CadastrarPerfilActivity extends AppCompatActivity {
     Button btnInserir;
     EditText txNome;
-    EditText txCurso;
+    EditText txEstado;
     EditText txDtNasc;
-    EditText txCampus;
-    EditText txMatricula;
-    EditText txInteresse;
-
+    EditText txCidade;
+    FirebaseAuth mAuth;
     GoogleApiClient mGoogleApiClient;
+    FirebaseUser currentUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,14 +39,7 @@ public class CadastrarPerfilActivity extends AppCompatActivity {
         setContentView(R.layout.activity_cadastrar_perfil);
 
         btnInserir = findViewById(R.id.btnInserir);
-        txInteresse = findViewById(R.id.txInteresses);
 
-        txInteresse.setOnFocusChangeListener(new View.OnFocusChangeListener() {
-            @Override
-            public void onFocusChange(View view, boolean b) {
-                Toast.makeText(CadastrarPerfilActivity.this, "Separe com virgula",Toast.LENGTH_LONG).show();
-            }
-        });
 
         btnInserir.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -56,6 +50,8 @@ public class CadastrarPerfilActivity extends AppCompatActivity {
     }
 
     protected void onStart() {
+        mAuth = FirebaseAuth.getInstance();
+        currentUser = mAuth.getCurrentUser();
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestEmail()
                 .build();
@@ -99,35 +95,27 @@ public class CadastrarPerfilActivity extends AppCompatActivity {
 
     public void inserir(){
         txNome = findViewById(R.id.txNome);
-        txCampus = findViewById(R.id.txCampus);
-        txCurso = findViewById(R.id.txCurso);
-        txMatricula = findViewById(R.id.txMatricula);
+        txEstado = findViewById(R.id.txEstado);
+        txCidade = findViewById(R.id.txCidade);
         txDtNasc = findViewById(R.id.txDtNasc);
-        txInteresse = findViewById(R.id.txInteresses);
-        String interesses = txInteresse.getText().toString();
 
-        Aluno aluno = new Aluno();
-        aluno.nome = txNome.getText().toString();
-        int mat = Integer.parseInt(txMatricula.getText().toString());
-        aluno.matricula = mat;
-        int dtNasc = Integer.parseInt(txDtNasc.getText().toString());
-        aluno.dt_nasc = dtNasc;
-        aluno.curso = txCurso.getText().toString();
-        aluno.campus = txCampus.getText().toString();
-
-
-
-        for(String s : interesses.split(",")){
-            Interesses it = new Interesses();
-            it.id = UUID.randomUUID().toString();
-            it.tag = s ;
-            aluno.interesses.add(it);
+        Usuario usuario = new Usuario();
+        usuario.nome = txNome.getText().toString();
+        usuario.estado = txEstado.getText().toString();
+        usuario.cidade = txCidade.getText().toString();
+        usuario.dtNasc = txDtNasc.getText().toString();
+        if (currentUser != null) {
+            usuario.email = currentUser.getEmail();
+            usuario.id = currentUser.getUid();
         }
 
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference Aluno = database.getReference("iesb/alunos/" + UUID.randomUUID().toString());
-        Aluno.setValue(aluno);
+        DatabaseReference Usuario = database.getReference("appEduca/usuarios/" + UUID.randomUUID().toString());
+        Usuario.setValue(usuario);
         Toast.makeText(CadastrarPerfilActivity.this, "Inserido Perfil com sucesso!",Toast.LENGTH_LONG).show();
+        Intent i = new Intent(getApplicationContext(), ListaActivity.class);
+        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(i);
     }
 }

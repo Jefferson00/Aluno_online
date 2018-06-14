@@ -23,7 +23,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity" />
+        <activity android:name=".MainActivity">
+
+        </activity>
         <activity android:name=".CadastroActivity" />
         <activity android:name=".RecuperaSenhaActivity" />
         <activity android:name=".LoginActivity">
@@ -61,7 +63,10 @@
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyAhrAzZHbJYVUa_3Yo3-m_WOJf9t_SxFpA" />
 
-        <activity android:name=".CadastrarPerfilActivity"></activity>
+        <activity android:name=".CadastrarPerfilActivity" />
+        <activity android:name=".ListaActivity">
+
+        </activity>
     </application>
 
 </manifest>
