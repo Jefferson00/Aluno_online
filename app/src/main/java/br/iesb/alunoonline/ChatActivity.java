@@ -7,8 +7,12 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
@@ -16,83 +20,95 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
-import java.util.List;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
-
-import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
-import retrofit2.Retrofit;
-
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
-
-    private GoogleMap nMap;
+public class ChatActivity extends AppCompatActivity {
+    private Button add_room;
+    private EditText room_name;
     FirebaseAuth mAuth;
     FirebaseUser currentUser;
-    String codEscola;
-    EscolaService escolaService;
 
     GoogleApiClient mGoogleApiClient;
+    private ListView listView;
+    private ArrayAdapter<String> arrayAdapter;
+    private ArrayList<String> list_of_rooms = new ArrayList<>();
+    private String name;
+    private DatabaseReference root = FirebaseDatabase.getInstance().getReference().getRoot();
+    FirebaseUser userLog = FirebaseAuth.getInstance().getCurrentUser();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_chat);
 
+        //add_room = (Button) findViewById(R.id.btn_add_room);
+        room_name = (EditText) findViewById(R.id.room_name_edittext);
+        listView = (ListView) findViewById(R.id.listView);
 
+        arrayAdapter = new ArrayAdapter<String>(this,android.R.layout.simple_list_item_1,list_of_rooms);
 
-        Intent intent = getIntent();
-        if (intent.hasExtra(Intent.EXTRA_TEXT)){
-            String codEscolaList = intent.getStringExtra(Intent.EXTRA_TEXT);
-            codEscola = codEscolaList;
+        listView.setAdapter(arrayAdapter);
+
+        //request_user_name();
+        if (userLog != null) {
+            name = userLog.getEmail();
         }
 
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://mobile-aceite.tcu.gov.br:80/nossaEscolaRS/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        escolaService = retrofit.create(EscolaService.class);
-
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-    }
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        nMap = googleMap;
-
-        Call<Escola> requisicao = escolaService.buscaEscola(codEscola);
-
-        requisicao.enqueue(new Callback<Escola>(){
-
+        /*add_room.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onResponse(Call<Escola> requisicao, Response<Escola> response) {
-                if (response.isSuccessful()){
-                    Escola e = response.body();
-                    if (e != null){
-                        LatLng escola = new LatLng(e.latitude, e.longitude);
-                        nMap.addMarker(new MarkerOptions().position(escola).title(e.nome));
-                        nMap.moveCamera(CameraUpdateFactory.newLatLngZoom(escola, 15));
-                    }
+            public void onClick(View view) {
+
+                Map<String,Object> map = new HashMap<String, Object>();
+                map.put(room_name.getText().toString(),"");
+                root.updateChildren(map);
+
+            }
+        });*/
+
+        root.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                Set<String> set = new HashSet<String>();
+                Iterator i = dataSnapshot.getChildren().iterator();
+
+                while (i.hasNext()){
+
+                    set.add(((DataSnapshot)i.next()).getKey());
                 }
+
+                list_of_rooms.clear();
+                list_of_rooms.addAll(set);
+
+                arrayAdapter.notifyDataSetChanged();
             }
 
             @Override
-            public void onFailure(Call<Escola> requisicao, Throwable t) {
-                Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_LONG).show();
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+
+                Intent intent = new Intent(getApplicationContext(),ChatRoomActivity.class);
+                intent.putExtra("room_name",((TextView)view).getText().toString() );
+                intent.putExtra("user_name",name);
+                startActivity(intent);
             }
         });
     }
@@ -109,7 +125,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mGoogleApiClient.connect();
         super.onStart();
     }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -124,20 +139,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         int id = item.getItemId();
         switch (id){
             case (R.id.item_listar) :
-                Intent it = new Intent(MainActivity.this, ListaActivity.class);
+                Intent it = new Intent(ChatActivity.this, ListaActivity.class);
                 startActivity(it);
                 return true;
             case (R.id.item_perfil) :
-                Intent it0 = new Intent(MainActivity.this, PerfilActivity.class);
+                Intent it0 = new Intent(ChatActivity.this, PerfilActivity.class);
                 startActivity(it0);
                 return true;
             case (R.id.item_cad_perfil)  :
-                Intent it1 = new Intent(MainActivity.this, CadastrarPerfilActivity.class);
+                Intent it1 = new Intent(ChatActivity.this, CadastrarPerfilActivity.class);
                 startActivity(it1);
-                return true;
-            case (R.id.item_chat)  :
-                Intent it2 = new Intent(MainActivity.this, ChatActivity.class);
-                startActivity(it2);
                 return true;
             case (R.id.item_sair) :
                 FirebaseAuth.getInstance().signOut();
@@ -159,5 +170,4 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
         return super.onOptionsItemSelected(item);
     }
-
 }

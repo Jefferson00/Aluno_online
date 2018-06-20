@@ -23,9 +23,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
-
-        </activity>
+        <activity android:name=".MainActivity" />
         <activity android:name=".CadastroActivity" />
         <activity android:name=".RecuperaSenhaActivity" />
         <activity android:name=".LoginActivity">
@@ -64,9 +62,9 @@
             android:value="AIzaSyAhrAzZHbJYVUa_3Yo3-m_WOJf9t_SxFpA" />
 
         <activity android:name=".CadastrarPerfilActivity" />
-        <activity android:name=".ListaActivity">
-
-        </activity>
+        <activity android:name=".ListaActivity" />
+        <activity android:name=".ChatActivity" />
+        <activity android:name=".ChatRoomActivity"></activity>
     </application>
 
 </manifest>

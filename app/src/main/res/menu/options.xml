@@ -7,9 +7,19 @@
         app:showAsAction="ifRoom"
         android:orderInCategory="1"
         />
-
+    <item android:title="Listar"
+        android:id="@+id/item_listar"
+        app:showAsAction="ifRoom"
+        android:orderInCategory="1"
+        />
     <item android:title="Cadastrar Perfil"
         android:id="@+id/item_cad_perfil"
+        app:showAsAction="ifRoom"
+        android:orderInCategory="1"
+        />
+
+    <item android:title="Chat"
+        android:id="@+id/item_chat"
         app:showAsAction="ifRoom"
         android:orderInCategory="1"
         />

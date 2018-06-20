@@ -16,17 +16,27 @@ import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.UserInfo;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+
 public class PerfilActivity extends AppCompatActivity {
     GoogleApiClient mGoogleApiClient;
     TextView txNome;
     TextView txEmail;
-    private DatabaseReference mDatabase;
+    TextView txEstado;
+    TextView txCidade;
+    //private DatabaseReference mDatabase;
+    private ArrayList<Usuario> listaUsuarios = new ArrayList<>();
+    private  String userID;
+    private FirebaseDatabase database;
+    private DatabaseReference appEducaRef;
     FirebaseUser userLog = FirebaseAuth.getInstance().getCurrentUser();
 
     @Override
@@ -36,9 +46,51 @@ public class PerfilActivity extends AppCompatActivity {
 
         txNome = findViewById(R.id.txNome);
         txEmail = findViewById(R.id.txEmail);
+        txEstado = findViewById(R.id.txEstado);
+        txCidade = findViewById(R.id.txCidade);
 
-        mDatabase = FirebaseDatabase.getInstance().getReference();
+       // mDatabase = FirebaseDatabase.getInstance().getReference();
+        if (userLog!=null) {
+            for (UserInfo userInfo : userLog.getProviderData()) {
+                if (userID == null && userInfo.getUid() != null) {
+                    userID = userLog.getUid();
+                }
+            }
 
+        }
+        getData();
+
+    }
+
+    public void getData(){
+        database = FirebaseDatabase.getInstance();
+        appEducaRef = database.getReference("appEduca");
+
+        DatabaseReference Usuario = database.getReference("appEduca/usuarios/");
+        Usuario.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Iterable<DataSnapshot> snapshotIterator = dataSnapshot.getChildren();
+                Iterator<DataSnapshot> iterator = snapshotIterator.iterator();
+
+                while((iterator.hasNext())){
+                    Usuario value = iterator.next().getValue(Usuario.class);
+                    if (value.getId().equals(userLog.getUid())){
+                        txNome.setText(value.getNome());
+                        txEmail.setText(value.getEmail());
+                        txEstado.setText(value.getEstado());
+                        txCidade.setText(value.getCidade());
+
+                    }
+
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
     }
 
     protected void onStart() {
@@ -52,26 +104,15 @@ public class PerfilActivity extends AppCompatActivity {
         mGoogleApiClient.connect();
         super.onStart();
 
-        mDatabase.addValueEventListener(new ValueEventListener() {
+        /*mDatabase.addValueEventListener(new ValueEventListener() {
 
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getValue() != null) {
                     for (DataSnapshot usuarios : dataSnapshot.getChildren()) {
-                        Usuario user = usuarios.getValue(Usuario.class);
-
-                        if (userLog != null) {
-                            String id = user.id;
-                            String userId = userLog.getUid();
-                            if (id != null){
-                                if (id.equals(userId)) {
-                                    txNome.setText(user.nome);
-                                    txEmail.setText(user.email);
-                                }
-                            }
-                        }
-
-
+                        Usuario user = new Usuario();
+                        user.setNome(usuarios.child("usuarios").child(userID).getValue(Usuario.class).getNome());
+                        txNome.setText(user.getNome());
                     }
                 }
             }
@@ -80,7 +121,7 @@ public class PerfilActivity extends AppCompatActivity {
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });
+        });*/
     }
 
     @Override
@@ -95,26 +136,36 @@ public class PerfilActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+        switch (id){
+            case (R.id.item_listar) :
+                Intent it = new Intent(PerfilActivity.this, ListaActivity.class);
+                startActivity(it);
+                return true;
+            case (R.id.item_cad_perfil)  :
+                Intent it1 = new Intent(PerfilActivity.this, CadastrarPerfilActivity.class);
+                startActivity(it1);
+                return true;
+            case (R.id.item_chat)  :
+                Intent it2 = new Intent(PerfilActivity.this, ChatActivity.class);
+                startActivity(it2);
+                return true;
+            case (R.id.item_sair) :
+                FirebaseAuth.getInstance().signOut();
+                Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+                        new ResultCallback<Status>() {
+                            @Override
+                            public void onResult(Status status) {
+                                // ...
+                                Toast.makeText(getApplicationContext(), "Logged Out", Toast.LENGTH_SHORT).show();
+                                Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+                                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(i);
+                            }
 
-        if (id == R.id.item_cad_perfil){
-            Intent it = new Intent(PerfilActivity.this, CadastrarPerfilActivity.class);
-            startActivity(it);
-            return true;
-        }
-        else if (id == R.id.item_sair){
-            Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
-                    new ResultCallback<Status>() {
-                        @Override
-                        public void onResult(Status status) {
-                            // ...
-                            Toast.makeText(getApplicationContext(), "Logged Out", Toast.LENGTH_SHORT).show();
-                            Intent i = new Intent(getApplicationContext(), LoginActivity.class);
-                            startActivity(i);
-                        }
+                        });
 
-                    });
+                return true;
 
-            return true;
         }
         return super.onOptionsItemSelected(item);
     }

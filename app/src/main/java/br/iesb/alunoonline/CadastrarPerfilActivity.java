@@ -74,21 +74,36 @@ public class CadastrarPerfilActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+        switch (id){
+            case (R.id.item_listar) :
+                Intent it = new Intent(CadastrarPerfilActivity.this, ListaActivity.class);
+                startActivity(it);
+                return true;
+            case (R.id.item_perfil) :
+                Intent it0 = new Intent(CadastrarPerfilActivity.this, PerfilActivity.class);
+                startActivity(it0);
+                return true;
+            case (R.id.item_chat)  :
+                Intent it2 = new Intent(CadastrarPerfilActivity.this, ChatActivity.class);
+                startActivity(it2);
+                return true;
+            case (R.id.item_sair) :
+                FirebaseAuth.getInstance().signOut();
+                Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+                        new ResultCallback<Status>() {
+                            @Override
+                            public void onResult(Status status) {
+                                // ...
+                                Toast.makeText(getApplicationContext(), "Logged Out", Toast.LENGTH_SHORT).show();
+                                Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+                                i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                startActivity(i);
+                            }
 
-            if (id == R.id.item_sair){
-            Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
-                    new ResultCallback<Status>() {
-                        @Override
-                        public void onResult(Status status) {
-                            // ...
-                            Toast.makeText(getApplicationContext(), "Logged Out", Toast.LENGTH_SHORT).show();
-                            Intent i = new Intent(getApplicationContext(), LoginActivity.class);
-                            startActivity(i);
-                        }
+                        });
 
-                    });
+                return true;
 
-            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -100,18 +115,18 @@ public class CadastrarPerfilActivity extends AppCompatActivity {
         txDtNasc = findViewById(R.id.txDtNasc);
 
         Usuario usuario = new Usuario();
-        usuario.nome = txNome.getText().toString();
-        usuario.estado = txEstado.getText().toString();
-        usuario.cidade = txCidade.getText().toString();
-        usuario.dtNasc = txDtNasc.getText().toString();
+        usuario.setNome( txNome.getText().toString());
+        usuario.setEstado(txEstado.getText().toString());
+        usuario.setCidade(txCidade.getText().toString());
+        usuario.setDtNasc(txDtNasc.getText().toString());
         if (currentUser != null) {
-            usuario.email = currentUser.getEmail();
-            usuario.id = currentUser.getUid();
+            usuario.setEmail(currentUser.getEmail());
+            usuario.setId(currentUser.getUid());
         }
 
 
         FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference Usuario = database.getReference("appEduca/usuarios/" + UUID.randomUUID().toString());
+        DatabaseReference Usuario = database.getReference("appEduca/usuarios/" + usuario.getId());
         Usuario.setValue(usuario);
         Toast.makeText(CadastrarPerfilActivity.this, "Inserido Perfil com sucesso!",Toast.LENGTH_LONG).show();
         Intent i = new Intent(getApplicationContext(), ListaActivity.class);

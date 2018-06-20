@@ -172,34 +172,37 @@ public class ListaActivity extends AppCompatActivity implements EscolasAdapter.L
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
+switch (id){
+    case (R.id.item_perfil) :
+        Intent it = new Intent(ListaActivity.this, PerfilActivity.class);
+        startActivity(it);
+        return true;
+    case (R.id.item_cad_perfil)  :
+        Intent it1 = new Intent(ListaActivity.this, CadastrarPerfilActivity.class);
+        startActivity(it1);
+        return true;
+    case (R.id.item_chat)  :
+        Intent it2 = new Intent(ListaActivity.this, ChatActivity.class);
+        startActivity(it2);
+        return true;
+    case (R.id.item_sair) :
+        FirebaseAuth.getInstance().signOut();
+        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
+                new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(Status status) {
+                        // ...
+                        Toast.makeText(getApplicationContext(), "Logged Out", Toast.LENGTH_SHORT).show();
+                        Intent i = new Intent(getApplicationContext(), LoginActivity.class);
+                        i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(i);
+                    }
 
-        if (id == R.id.item_perfil){
-            Intent it = new Intent(ListaActivity.this, PerfilActivity.class);
-            startActivity(it);
-            return true;
-        }
-        else if (id == R.id.item_cad_perfil){
-            Intent it = new Intent(ListaActivity.this, CadastrarPerfilActivity.class);
-            startActivity(it);
-            return true;
-        }
-        else if (id == R.id.item_sair){
-            FirebaseAuth.getInstance().signOut();
-            Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
-                    new ResultCallback<Status>() {
-                        @Override
-                        public void onResult(Status status) {
-                            // ...
-                            Toast.makeText(getApplicationContext(), "Logged Out", Toast.LENGTH_SHORT).show();
-                            Intent i = new Intent(getApplicationContext(), LoginActivity.class);
-                            i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(i);
-                        }
+                });
+        mAuth.signOut();
+        return true;
 
-                    });
-            mAuth.signOut();
-            return true;
-        }
+}
         return super.onOptionsItemSelected(item);
     }
 }
